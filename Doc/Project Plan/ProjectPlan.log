@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  15 MAR 2019 13:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.5.23)  15 MAR 2019 14:18
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -122,37 +122,38 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 35.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line 35.
- [1
+
+./ProjectPlan.tex:37: Extra alignment tab has been changed to \cr.
+<template> \endtemplate 
+                        
+l.37 ...lticolumn{3}{|c|}{Weekly Project Schedule}
+                                                   \\
+? 
+
+Overfull \hbox (73.2277pt too wide) in paragraph at lines 35--51
+[] 
+ []
+
+
+./ProjectPlan.tex:53: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.53 \par
+         
+? 
+[1
 
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Underfull \hbox (badness 10000) in paragraph at lines 47--48
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 55--56
-[]|\OT1/cmr/m/n/10 Thode Li-brary
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 56--57
-[]|\OT1/cmr/m/n/10 Thode Li-brary
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 57--58
-[]|\OT1/cmr/m/n/10 Thode Li-brary
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 73--77
 
  []
 
-[2]
-Overfull \hbox (12.86775pt too wide) in paragraph at lines 83--87
-\OT1/cmr/bx/n/10 Documentation Gen-er-a-tion : \OT1/cmr/m/n/10 Sphinx - http://
-www.sphinx-doc.org/en/master/ 
+
+Overfull \hbox (51.43301pt too wide) in paragraph at lines 59--71
+[][] 
  []
 
 
@@ -160,11 +161,26 @@ Underfull \hbox (badness 10000) in paragraph at lines 83--87
 
  []
 
+[2]
+Overfull \hbox (12.86775pt too wide) in paragraph at lines 93--97
+\OT1/cmr/bx/n/10 Documentation Gen-er-a-tion : \OT1/cmr/m/n/10 Sphinx - http://
+www.sphinx-doc.org/en/master/ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 93--97
+
+ []
+
+./ProjectPlan.tex:102: Undefined control sequence.
+l.102 \href
+           {https://www.python.org/dev/peps/pep-3103/}
+? 
 [3] [4] (./ProjectPlan.aux) ) 
 Here is how much of TeX's memory you used:
  1604 strings out of 492995
  22513 string characters out of 6132704
- 82056 words of memory out of 5000000
+ 83056 words of memory out of 5000000
  5201 multiletter control sequences out of 15000+600000
  7947 words of font info for 28 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -176,7 +192,7 @@ ic/amsfonts/cm/cmbxti10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/pub
 lic/amsfonts/cm/cmr10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmr12.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/public/
 amsfonts/cm/cmr17.pfb>
-Output written on ProjectPlan.pdf (4 pages, 95201 bytes).
+Output written on ProjectPlan.pdf (4 pages, 95884 bytes).
 PDF statistics:
  41 PDF objects out of 1000 (max. 8388607)
  28 compressed objects within 1 object stream
