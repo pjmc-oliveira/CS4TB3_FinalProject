@@ -1,0 +1,19 @@
+var READTHEDOCS_DATA = {
+    project: "cpython-devguide",
+    version: "latest",
+    language: "en",
+    programming_language: "py",
+    subprojects: {},
+    canonical_url: "http://devguide.python.org/",
+    theme: "python_docs_theme",
+    builder: "sphinx",
+    docroot: "/",
+    source_suffix: ".rst",
+    api_host: "https://readthedocs.org",
+    commit: "5998e6d6",
+    ad_free: false,
+
+    global_analytics_code: 'UA-17997319-1',
+    user_analytics_code: null
+};
+
