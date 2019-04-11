@@ -1435,7 +1435,8 @@ find_ann(asdl_seq *stmts)
                   find_ann(st->v.AsyncFor.orelse);
             break;
         case While_kind:
-            res = find_ann(st->v.While.body) ||
+            res = find_ann(st->v.While.setup) ||
+                  find_ann(st->v.While.body) ||
                   find_ann(st->v.While.orelse);
             break;
         case Until_kind:
