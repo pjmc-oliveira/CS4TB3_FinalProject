@@ -196,6 +196,8 @@ static PyNumberMethods PyHKEY_NumberMethods =
     PyHKEY_unaryFailureFunc,            /* nb_negative */
     PyHKEY_unaryFailureFunc,            /* nb_positive */
     PyHKEY_unaryFailureFunc,            /* nb_absolute */
+    PyHKEY_unaryFailureFunc,            /* nb_increment */
+    PyHKEY_unaryFailureFunc,            /* nb_decrement */
     PyHKEY_boolFunc,                    /* nb_bool */
     PyHKEY_unaryFailureFunc,            /* nb_invert */
     PyHKEY_binaryFailureFunc,           /* nb_lshift */

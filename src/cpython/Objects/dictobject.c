@@ -3998,6 +3998,8 @@ static PyNumberMethods dictviews_as_number = {
     0,                                  /*nb_negative*/
     0,                                  /*nb_positive*/
     0,                                  /*nb_absolute*/
+    0,                                  /*nb_increment*/
+    0,                                  /*nb_decrement*/
     0,                                  /*nb_bool*/
     0,                                  /*nb_invert*/
     0,                                  /*nb_lshift*/

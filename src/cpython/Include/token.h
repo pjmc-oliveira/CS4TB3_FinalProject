@@ -69,7 +69,9 @@ extern "C" {
 #define COMMENT         55
 #define NL              56
 #define ENCODING                57
-#define N_TOKENS        58
+#define INCR            58
+#define DECR            59
+#define N_TOKENS        60
 
 /* Special definitions for cooperation with parser */
 

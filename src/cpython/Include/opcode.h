@@ -16,6 +16,8 @@ extern "C" {
 #define UNARY_POSITIVE           10
 #define UNARY_NEGATIVE           11
 #define UNARY_NOT                12
+#define INCREMENT                13
+#define DECREMENT                14
 #define UNARY_INVERT             15
 #define BINARY_MATRIX_MULTIPLY   16
 #define INPLACE_MATRIX_MULTIPLY  17

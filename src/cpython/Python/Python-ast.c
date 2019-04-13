@@ -118,6 +118,12 @@ static char *While_fields[]={
     "body",
     "orelse",
 };
+static PyTypeObject *Until_type;
+static char *Until_fields[]={
+    "test",
+    "body",
+    "orelse",
+};
 static PyTypeObject *If_type;
 static char *If_fields[]={
     "test",
@@ -411,12 +417,14 @@ static PyTypeObject *BitAnd_type;
 static PyTypeObject *FloorDiv_type;
 static PyTypeObject *unaryop_type;
 static PyObject *Invert_singleton, *Not_singleton, *UAdd_singleton,
-*USub_singleton;
+*USub_singleton, *Incr_singleton, *Decr_singleton;
 static PyObject* ast2obj_unaryop(unaryop_ty);
 static PyTypeObject *Invert_type;
 static PyTypeObject *Not_type;
 static PyTypeObject *UAdd_type;
 static PyTypeObject *USub_type;
+static PyTypeObject *Incr_type;
+static PyTypeObject *Decr_type;
 static PyTypeObject *cmpop_type;
 static PyObject *Eq_singleton, *NotEq_singleton, *Lt_singleton, *LtE_singleton,
 *Gt_singleton, *GtE_singleton, *Is_singleton, *IsNot_singleton, *In_singleton,
@@ -879,6 +887,8 @@ static int init_types(void)
     if (!AsyncFor_type) return 0;
     While_type = make_type("While", stmt_type, While_fields, 3);
     if (!While_type) return 0;
+    Until_type = make_type("Until", stmt_type, Until_fields, 3);
+    if (!Until_type) return 0;
     If_type = make_type("If", stmt_type, If_fields, 3);
     if (!If_type) return 0;
     With_type = make_type("With", stmt_type, With_fields, 2);
@@ -1094,6 +1104,14 @@ static int init_types(void)
     if (!USub_type) return 0;
     USub_singleton = PyType_GenericNew(USub_type, NULL, NULL);
     if (!USub_singleton) return 0;
+    Incr_type = make_type("Incr", unaryop_type, NULL, 0);
+    if (!Incr_type) return 0;
+    Incr_singleton = PyType_GenericNew(Incr_type, NULL, NULL);
+    if (!Incr_singleton) return 0;
+    Decr_type = make_type("Decr", unaryop_type, NULL, 0);
+    if (!Decr_type) return 0;
+    Decr_singleton = PyType_GenericNew(Decr_type, NULL, NULL);
+    if (!Decr_singleton) return 0;
     cmpop_type = make_type("cmpop", &AST_type, NULL, 0);
     if (!cmpop_type) return 0;
     if (!add_attributes(cmpop_type, NULL, 0)) return 0;
@@ -1507,6 +1525,28 @@ While(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno, int
     p->v.While.test = test;
     p->v.While.body = body;
     p->v.While.orelse = orelse;
+    p->lineno = lineno;
+    p->col_offset = col_offset;
+    return p;
+}
+
+stmt_ty
+Until(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno, int
+      col_offset, PyArena *arena)
+{
+    stmt_ty p;
+    if (!test) {
+        PyErr_SetString(PyExc_ValueError,
+                        "field test is required for Until");
+        return NULL;
+    }
+    p = (stmt_ty)PyArena_Malloc(arena, sizeof(*p));
+    if (!p)
+        return NULL;
+    p->kind = Until_kind;
+    p->v.Until.test = test;
+    p->v.Until.body = body;
+    p->v.Until.orelse = orelse;
     p->lineno = lineno;
     p->col_offset = col_offset;
     return p;
@@ -2859,6 +2899,25 @@ ast2obj_stmt(void* _o)
             goto failed;
         Py_DECREF(value);
         break;
+    case Until_kind:
+        result = PyType_GenericNew(Until_type, NULL, NULL);
+        if (!result) goto failed;
+        value = ast2obj_expr(o->v.Until.test);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_test, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        value = ast2obj_list(o->v.Until.body, ast2obj_stmt);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_body, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        value = ast2obj_list(o->v.Until.orelse, ast2obj_stmt);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_orelse, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        break;
     case If_kind:
         result = PyType_GenericNew(If_type, NULL, NULL);
         if (!result) goto failed;
@@ -3638,6 +3697,12 @@ PyObject* ast2obj_unaryop(unaryop_ty o)
         case USub:
             Py_INCREF(USub_singleton);
             return USub_singleton;
+        case Incr:
+            Py_INCREF(Incr_singleton);
+            return Incr_singleton;
+        case Decr:
+            Py_INCREF(Decr_singleton);
+            return Decr_singleton;
         default:
             /* should never happen, but just in case ... */
             PyErr_Format(PyExc_SystemError, "unknown unaryop found");
@@ -5044,6 +5109,92 @@ obj2ast_stmt(PyObject* obj, stmt_ty* out, PyArena* arena)
             Py_CLEAR(tmp);
         }
         *out = While(test, body, orelse, lineno, col_offset, arena);
+        if (*out == NULL) goto failed;
+        return 0;
+    }
+    isinstance = PyObject_IsInstance(obj, (PyObject*)Until_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        expr_ty test;
+        asdl_seq* body;
+        asdl_seq* orelse;
+
+        if (_PyObject_LookupAttrId(obj, &PyId_test, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"test\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            res = obj2ast_expr(tmp, &test, arena);
+            if (res != 0) goto failed;
+            Py_CLEAR(tmp);
+        }
+        if (_PyObject_LookupAttrId(obj, &PyId_body, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"body\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            Py_ssize_t len;
+            Py_ssize_t i;
+            if (!PyList_Check(tmp)) {
+                PyErr_Format(PyExc_TypeError, "Until field \"body\" must be a list, not a %.200s", tmp->ob_type->tp_name);
+                goto failed;
+            }
+            len = PyList_GET_SIZE(tmp);
+            body = _Py_asdl_seq_new(len, arena);
+            if (body == NULL) goto failed;
+            for (i = 0; i < len; i++) {
+                stmt_ty val;
+                res = obj2ast_stmt(PyList_GET_ITEM(tmp, i), &val, arena);
+                if (res != 0) goto failed;
+                if (len != PyList_GET_SIZE(tmp)) {
+                    PyErr_SetString(PyExc_RuntimeError, "Until field \"body\" changed size during iteration");
+                    goto failed;
+                }
+                asdl_seq_SET(body, i, val);
+            }
+            Py_CLEAR(tmp);
+        }
+        if (_PyObject_LookupAttrId(obj, &PyId_orelse, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"orelse\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            Py_ssize_t len;
+            Py_ssize_t i;
+            if (!PyList_Check(tmp)) {
+                PyErr_Format(PyExc_TypeError, "Until field \"orelse\" must be a list, not a %.200s", tmp->ob_type->tp_name);
+                goto failed;
+            }
+            len = PyList_GET_SIZE(tmp);
+            orelse = _Py_asdl_seq_new(len, arena);
+            if (orelse == NULL) goto failed;
+            for (i = 0; i < len; i++) {
+                stmt_ty val;
+                res = obj2ast_stmt(PyList_GET_ITEM(tmp, i), &val, arena);
+                if (res != 0) goto failed;
+                if (len != PyList_GET_SIZE(tmp)) {
+                    PyErr_SetString(PyExc_RuntimeError, "Until field \"orelse\" changed size during iteration");
+                    goto failed;
+                }
+                asdl_seq_SET(orelse, i, val);
+            }
+            Py_CLEAR(tmp);
+        }
+        *out = Until(test, body, orelse, lineno, col_offset, arena);
         if (*out == NULL) goto failed;
         return 0;
     }
@@ -7497,6 +7648,22 @@ obj2ast_unaryop(PyObject* obj, unaryop_ty* out, PyArena* arena)
         *out = USub;
         return 0;
     }
+    isinstance = PyObject_IsInstance(obj, (PyObject *)Incr_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        *out = Incr;
+        return 0;
+    }
+    isinstance = PyObject_IsInstance(obj, (PyObject *)Decr_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        *out = Decr;
+        return 0;
+    }
 
     PyErr_Format(PyExc_TypeError, "expected some sort of unaryop, but got %R", obj);
     return 1;
@@ -8191,6 +8358,8 @@ PyInit__ast(void)
         return NULL;
     if (PyDict_SetItemString(d, "While", (PyObject*)While_type) < 0) return
         NULL;
+    if (PyDict_SetItemString(d, "Until", (PyObject*)Until_type) < 0) return
+        NULL;
     if (PyDict_SetItemString(d, "If", (PyObject*)If_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "With", (PyObject*)With_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "AsyncWith", (PyObject*)AsyncWith_type) < 0)
@@ -8321,6 +8490,8 @@ PyInit__ast(void)
     if (PyDict_SetItemString(d, "Not", (PyObject*)Not_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "UAdd", (PyObject*)UAdd_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "USub", (PyObject*)USub_type) < 0) return NULL;
+    if (PyDict_SetItemString(d, "Incr", (PyObject*)Incr_type) < 0) return NULL;
+    if (PyDict_SetItemString(d, "Decr", (PyObject*)Decr_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "cmpop", (PyObject*)cmpop_type) < 0) return
         NULL;
     if (PyDict_SetItemString(d, "Eq", (PyObject*)Eq_type) < 0) return NULL;

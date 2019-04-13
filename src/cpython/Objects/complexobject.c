@@ -615,6 +615,22 @@ complex_abs(PyComplexObject *v)
     return PyFloat_FromDouble(result);
 }
 
+static PyObject *
+complex_incr(PyComplexObject *v)
+{
+    PyErr_SetString(PyExc_TypeError,
+                    "can't increment a complex number.");
+    return NULL;
+}
+
+static PyObject *
+complex_decr(PyComplexObject *v)
+{
+    PyErr_SetString(PyExc_TypeError,
+                    "can't decrement a complex number.");
+    return NULL;
+}
+
 static int
 complex_bool(PyComplexObject *v)
 {
@@ -1087,6 +1103,8 @@ static PyNumberMethods complex_as_number = {
     (unaryfunc)complex_neg,                     /* nb_negative */
     (unaryfunc)complex_pos,                     /* nb_positive */
     (unaryfunc)complex_abs,                     /* nb_absolute */
+    (unaryfunc)complex_incr,                     /* nb_increment */
+    (unaryfunc)complex_decr,                     /* nb_decrement */
     (inquiry)complex_bool,                      /* nb_bool */
     0,                                          /* nb_invert */
     0,                                          /* nb_lshift */

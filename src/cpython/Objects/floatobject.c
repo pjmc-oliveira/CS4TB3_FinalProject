@@ -816,6 +816,20 @@ float_abs(PyFloatObject *v)
     return PyFloat_FromDouble(fabs(v->ob_fval));
 }
 
+static PyObject *
+float_incr(PyFloatObject *v)
+{
+    v->ob_fval += 1;
+    return PyFloat_FromDouble(v->ob_fval);
+}
+
+static PyObject *
+float_decr(PyFloatObject *v)
+{
+    v->ob_fval -= 1;
+    return PyFloat_FromDouble(v->ob_fval);
+}
+
 static int
 float_bool(PyFloatObject *v)
 {
@@ -1881,6 +1895,8 @@ static PyNumberMethods float_as_number = {
     (unaryfunc)float_neg, /* nb_negative */
     float_float,        /* nb_positive */
     (unaryfunc)float_abs, /* nb_absolute */
+    (unaryfunc)float_incr, /* nb_increment */
+    (unaryfunc)float_decr, /* nb_decrement */
     (inquiry)float_bool, /* nb_bool */
     0,                  /* nb_invert */
     0,                  /* nb_lshift */

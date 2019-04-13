@@ -4071,6 +4071,8 @@ static PyNumberMethods PyCFuncPtr_as_number = {
     0, /* nb_negative */
     0, /* nb_positive */
     0, /* nb_absolute */
+    0, /* nb_increment */
+    0, /* nb_decrement */
     (inquiry)PyCFuncPtr_bool, /* nb_bool */
 };
 
@@ -4763,6 +4765,8 @@ static PyNumberMethods Simple_as_number = {
     0, /* nb_negative */
     0, /* nb_positive */
     0, /* nb_absolute */
+    0, /* nb_increment */
+    0, /* nb_decrement */
     (inquiry)Simple_bool, /* nb_bool */
 };
 
@@ -5167,6 +5171,8 @@ static PyNumberMethods Pointer_as_number = {
     0, /* nb_negative */
     0, /* nb_positive */
     0, /* nb_absolute */
+    0, /* nb_increment */
+    0, /* nb_decrement */
     (inquiry)Pointer_bool, /* nb_bool */
 };
 

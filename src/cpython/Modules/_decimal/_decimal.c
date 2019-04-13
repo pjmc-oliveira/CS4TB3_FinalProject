@@ -4569,6 +4569,8 @@ static PyNumberMethods dec_number_methods =
     (unaryfunc) nm_mpd_qminus,
     (unaryfunc) nm_mpd_qplus,
     (unaryfunc) nm_mpd_qabs,
+    (unaryfunc) 0, // increment
+    (unaryfunc) 0, // decrement
     (inquiry) nm_nonzero,
     (unaryfunc) 0,   /* no bit-complement */
     (binaryfunc) 0,  /* no shiftl */

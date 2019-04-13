@@ -4976,6 +4976,8 @@ inherit_slots(PyTypeObject *type, PyTypeObject *base)
         COPYNUM(nb_negative);
         COPYNUM(nb_positive);
         COPYNUM(nb_absolute);
+        COPYNUM(nb_increment);
+        COPYNUM(nb_decrement);
         COPYNUM(nb_bool);
         COPYNUM(nb_invert);
         COPYNUM(nb_lshift);
@@ -6200,6 +6202,8 @@ slot_nb_power(PyObject *self, PyObject *other, PyObject *modulus)
 SLOT0(slot_nb_negative, "__neg__")
 SLOT0(slot_nb_positive, "__pos__")
 SLOT0(slot_nb_absolute, "__abs__")
+SLOT0(slot_nb_increment, "__incr__")
+SLOT0(slot_nb_decrement, "__decr__")
 
 static int
 slot_nb_bool(PyObject *self)
@@ -6877,6 +6881,8 @@ static slotdef slotdefs[] = {
     UNSLOT("__pos__", nb_positive, slot_nb_positive, wrap_unaryfunc, "+self"),
     UNSLOT("__abs__", nb_absolute, slot_nb_absolute, wrap_unaryfunc,
            "abs(self)"),
+    UNSLOT("__incr__", nb_increment, slot_nb_increment, wrap_unaryfunc, "++self"),
+    UNSLOT("__decr__", nb_decrement, slot_nb_decrement, wrap_unaryfunc, "--self"),
     UNSLOT("__bool__", nb_bool, slot_nb_bool, wrap_inquirypred,
            "self != 0"),
     UNSLOT("__invert__", nb_invert, slot_nb_invert, wrap_unaryfunc, "~self"),

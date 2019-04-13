@@ -4245,6 +4245,26 @@ long_abs(PyLongObject *v)
         return long_long((PyObject *)v);
 }
 
+static PyObject *
+long_incr(PyLongObject *v)
+{
+    PyLongObject* result =
+        (PyLongObject *) long_add(v, (PyLongObject *)_PyLong_One);
+    // Py_DECREF(v);
+    v = (PyLongObject *) _PyLong_Copy(result);
+    return (PyObject *) v;
+}
+
+static PyObject *
+long_decr(PyLongObject *v)
+{
+    PyLongObject* result =
+        (PyLongObject *) long_sub(v, (PyLongObject *)_PyLong_One);
+    // Py_DECREF(v);
+    v = (PyLongObject *) _PyLong_Copy(result);
+    return (PyObject *) v;
+}
+
 static int
 long_bool(PyLongObject *v)
 {
@@ -5349,6 +5369,8 @@ static PyNumberMethods long_as_number = {
     (unaryfunc)long_neg,        /*nb_negative*/
     (unaryfunc)long_long,       /*tp_positive*/
     (unaryfunc)long_abs,        /*tp_absolute*/
+    (unaryfunc)long_incr,        /*nb_increment*/
+    (unaryfunc)long_decr,        /*nb_decrement*/
     (inquiry)long_bool,         /*tp_bool*/
     (unaryfunc)long_invert,     /*nb_invert*/
     long_lshift,                /*nb_lshift*/

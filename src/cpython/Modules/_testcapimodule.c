@@ -4984,6 +4984,8 @@ static PyNumberMethods matmulType_as_number = {
     0,                          /* nb_negative */
     0,                          /* tp_positive */
     0,                          /* tp_absolute */
+    0,                          /* tp_increment */
+    0,                          /* tp_decrement */
     0,                          /* tp_bool */
     0,                          /* nb_invert */
     0,                          /* nb_lshift */

@@ -110,6 +110,8 @@ const char *_PyParser_TokenNames[] = {
     "COMMENT",
     "NL",
     "ENCODING",
+    "INCR",
+    "DECR",
     "<N_TOKENS>"
 };
 
@@ -1178,12 +1180,14 @@ PyToken_TwoChars(int c1, int c2)
     case '+':
         switch (c2) {
         case '=':               return PLUSEQUAL;
+        case '+':               return INCR;
         }
         break;
     case '-':
         switch (c2) {
         case '=':               return MINEQUAL;
         case '>':               return RARROW;
+        case '-':               return DECR;
         }
         break;
     case '*':

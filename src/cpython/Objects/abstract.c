@@ -1200,6 +1200,38 @@ PyNumber_Negative(PyObject *o)
 }
 
 PyObject *
+PyNumber_Increment(PyObject *o)
+{
+    PyNumberMethods *m;
+
+    if (o == NULL) {
+        return null_error();
+    }
+
+    m = o->ob_type->tp_as_number;
+    if (m && m->nb_increment)
+        return (*m->nb_increment)(o);
+
+    return type_error("bad operand type for unary ++: '%.200s'", o);
+}
+
+PyObject *
+PyNumber_Decrement(PyObject *o)
+{
+    PyNumberMethods *m;
+
+    if (o == NULL) {
+        return null_error();
+    }
+
+    m = o->ob_type->tp_as_number;
+    if (m && m->nb_decrement)
+        return (*m->nb_decrement)(o);
+
+    return type_error("bad operand type for unary --: '%.200s'", o);
+}
+
+PyObject *
 PyNumber_Positive(PyObject *o)
 {
     PyNumberMethods *m;

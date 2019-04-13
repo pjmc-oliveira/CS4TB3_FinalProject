@@ -1161,6 +1161,26 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             DISPATCH();
         }
 
+        TARGET(INCREMENT) {
+            PyObject *value = TOP();
+            PyObject *res = PyNumber_Increment(value);
+            Py_DECREF(value);
+            SET_TOP(res);
+            if (res == NULL)
+                goto error;
+            DISPATCH();
+        }
+
+        TARGET(DECREMENT) {
+            PyObject *value = TOP();
+            PyObject *res = PyNumber_Decrement(value);
+            Py_DECREF(value);
+            SET_TOP(res);
+            if (res == NULL)
+                goto error;
+            DISPATCH();
+        }
+
         TARGET(UNARY_NOT) {
             PyObject *value = TOP();
             int err = PyObject_IsTrue(value);

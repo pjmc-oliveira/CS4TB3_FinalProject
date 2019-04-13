@@ -19,7 +19,8 @@ typedef enum _operator { Add=1, Sub=2, Mult=3, MatMult=4, Div=5, Mod=6, Pow=7,
                          LShift=8, RShift=9, BitOr=10, BitXor=11, BitAnd=12,
                          FloorDiv=13 } operator_ty;
 
-typedef enum _unaryop { Invert=1, Not=2, UAdd=3, USub=4 } unaryop_ty;
+typedef enum _unaryop { Invert=1, Not=2, UAdd=3, USub=4, Incr=5, Decr=6 }
+                        unaryop_ty;
 
 typedef enum _cmpop { Eq=1, NotEq=2, Lt=3, LtE=4, Gt=5, GtE=6, Is=7, IsNot=8,
                       In=9, NotIn=10 } cmpop_ty;
@@ -66,11 +67,11 @@ struct _mod {
 enum _stmt_kind {FunctionDef_kind=1, AsyncFunctionDef_kind=2, ClassDef_kind=3,
                   Return_kind=4, Delete_kind=5, Assign_kind=6,
                   AugAssign_kind=7, AnnAssign_kind=8, For_kind=9,
-                  AsyncFor_kind=10, While_kind=11, If_kind=12, With_kind=13,
-                  AsyncWith_kind=14, Raise_kind=15, Try_kind=16,
-                  Assert_kind=17, Import_kind=18, ImportFrom_kind=19,
-                  Global_kind=20, Nonlocal_kind=21, Expr_kind=22, Pass_kind=23,
-                  Break_kind=24, Continue_kind=25};
+                  AsyncFor_kind=10, While_kind=11, Until_kind=12, If_kind=13,
+                  With_kind=14, AsyncWith_kind=15, Raise_kind=16, Try_kind=17,
+                  Assert_kind=18, Import_kind=19, ImportFrom_kind=20,
+                  Global_kind=21, Nonlocal_kind=22, Expr_kind=23, Pass_kind=24,
+                  Break_kind=25, Continue_kind=26};
 struct _stmt {
     enum _stmt_kind kind;
     union {
@@ -143,6 +144,12 @@ struct _stmt {
             asdl_seq *body;
             asdl_seq *orelse;
         } While;
+
+        struct {
+            expr_ty test;
+            asdl_seq *body;
+            asdl_seq *orelse;
+        } Until;
 
         struct {
             expr_ty test;
@@ -481,6 +488,9 @@ stmt_ty _Py_AsyncFor(expr_ty target, expr_ty iter, asdl_seq * body, asdl_seq *
                      orelse, int lineno, int col_offset, PyArena *arena);
 #define While(a0, a1, a2, a3, a4, a5) _Py_While(a0, a1, a2, a3, a4, a5)
 stmt_ty _Py_While(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno,
+                  int col_offset, PyArena *arena);
+#define Until(a0, a1, a2, a3, a4, a5) _Py_Until(a0, a1, a2, a3, a4, a5)
+stmt_ty _Py_Until(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno,
                   int col_offset, PyArena *arena);
 #define If(a0, a1, a2, a3, a4, a5) _Py_If(a0, a1, a2, a3, a4, a5)
 stmt_ty _Py_If(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno,

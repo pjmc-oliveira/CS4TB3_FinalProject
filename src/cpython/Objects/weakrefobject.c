@@ -504,6 +504,8 @@ WRAP_TERNARY(proxy_pow, PyNumber_Power)
 WRAP_UNARY(proxy_neg, PyNumber_Negative)
 WRAP_UNARY(proxy_pos, PyNumber_Positive)
 WRAP_UNARY(proxy_abs, PyNumber_Absolute)
+WRAP_UNARY(proxy_incr, PyNumber_Increment)
+WRAP_UNARY(proxy_decr, PyNumber_Decrement)
 WRAP_UNARY(proxy_invert, PyNumber_Invert)
 WRAP_BINARY(proxy_lshift, PyNumber_Lshift)
 WRAP_BINARY(proxy_rshift, PyNumber_Rshift)
@@ -617,6 +619,8 @@ static PyNumberMethods proxy_as_number = {
     proxy_neg,              /*nb_negative*/
     proxy_pos,              /*nb_positive*/
     proxy_abs,              /*nb_absolute*/
+    proxy_incr,             /*nb_increment*/
+    proxy_decr,             /*nb_decrement*/
     (inquiry)proxy_bool,    /*nb_bool*/
     proxy_invert,           /*nb_invert*/
     proxy_lshift,           /*nb_lshift*/

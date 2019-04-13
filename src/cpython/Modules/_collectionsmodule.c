@@ -1581,6 +1581,8 @@ static PyNumberMethods deque_as_number = {
     0,                                  /* nb_negative */
     0,                                  /* nb_positive */
     0,                                  /* nb_absolute */
+    0,                                  /* nb_increment */
+    0,                                  /* nb_decrement */
     (inquiry)deque_bool,                /* nb_bool */
     0,                                  /* nb_invert */
  };
