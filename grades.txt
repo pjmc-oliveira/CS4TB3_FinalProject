@@ -1,3 +1,21 @@
 Project Plan 3/3:
 Good ideas. Start with pattern matching and external-internal function argument
 names; do-while and case statements should be straightforward.
+
+Project Artifacts Feedback:
+- proof-read the poster, it is full of errors, e.g. "achieve *their* goals",
+"more flexibility*.", "CPython starts with a grammar, Modifications were": what
+does "CPython starts with a grammar" mean, why are "Modifications" capitalzied;
+there are too many errors to list them all. Use Grammarly to check each
+sentence. Some sentences are vague, can be shortened, are repetitive; be as
+concise and precise as possible.
+- give some statistics about the development, e.g. number of lines, classes,
+modules modified
+- you may add some personal experience, e.g. what the most difficult part was,
+what you would have done differently if you would do it again, what you would
+like to do next
+- no need to give the address in the header, affiliation and date are sufficient
+- the src folder gives the impression that this is literally taken from
+the Python sources without modifications. Clearly state in the readme which
+files are taken without modifications, which are modified, which are new
+Looks like interesting work!
