@@ -3647,8 +3647,7 @@ ast_for_if_stmt(struct compiling *c, const node *n)
 static stmt_ty
 ast_for_unless_stmt(struct compiling *c, const node *n)
 {
-    /* unless_stmt: 'unless' test ':' suite ('elif' test ':' suite)*
-       ['else' ':' suite]
+    /* unless_stmt: 'unless' test ':' suite  ['else' ':' suite]
     */
     char *s;
 
@@ -3723,7 +3722,7 @@ ast_for_unless_stmt(struct compiling *c, const node *n)
                 return NULL;
 
             asdl_seq_SET(orelse, 0,
-                         If(expression, suite_seq, suite_seq2,
+                         Unless(expression, suite_seq, suite_seq2,
                             LINENO(CHILD(n, NCH(n) - 6)),
                             CHILD(n, NCH(n) - 6)->n_col_offset,
                             c->c_arena));
@@ -3744,7 +3743,7 @@ ast_for_unless_stmt(struct compiling *c, const node *n)
                 return NULL;
 
             asdl_seq_SET(newobj, 0,
-                         If(expression, suite_seq, orelse,
+                         Unless(expression, suite_seq, orelse,
                             LINENO(CHILD(n, off)),
                             CHILD(n, off)->n_col_offset, c->c_arena));
             orelse = newobj;

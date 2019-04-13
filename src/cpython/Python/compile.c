@@ -2352,10 +2352,10 @@ compiler_unless(struct compiler *c, stmt_ty s)
     /* constant = 0: "if 0"
      * constant = 1: "if 1", "if 2", ...
      * constant = -1: rest */
-    if (constant == 0) {
+    if (constant == 1 ) {
         if (s->v.Unless.orelse)
             VISIT_SEQ(c, stmt, s->v.Unless.orelse);
-    } else if (constant == 1) {
+    } else if (constant == 0) {
         VISIT_SEQ(c, stmt, s->v.Unless.body);
     } else {
         if (asdl_seq_LEN(s->v.Unless.orelse)) {
@@ -2365,7 +2365,7 @@ compiler_unless(struct compiler *c, stmt_ty s)
         }
         else
             next = end;
-        if (!compiler_jump_if(c, s->v.Unless.test, next, 0))
+        if (!compiler_jump_if(c, s->v.Unless.test, next, 1))
             return 0;
         VISIT_SEQ(c, stmt, s->v.Unless.body);
         if (asdl_seq_LEN(s->v.Unless.orelse)) {
