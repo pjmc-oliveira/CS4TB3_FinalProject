@@ -112,8 +112,16 @@ static char *AsyncFor_fields[]={
     "orelse",
 };
 static PyTypeObject *While_type;
+_Py_IDENTIFIER(setup);
 _Py_IDENTIFIER(test);
 static char *While_fields[]={
+    "setup",
+    "test",
+    "body",
+    "orelse",
+};
+static PyTypeObject *Until_type;
+static char *Until_fields[]={
     "test",
     "body",
     "orelse",
@@ -877,8 +885,10 @@ static int init_types(void)
     if (!For_type) return 0;
     AsyncFor_type = make_type("AsyncFor", stmt_type, AsyncFor_fields, 4);
     if (!AsyncFor_type) return 0;
-    While_type = make_type("While", stmt_type, While_fields, 3);
+    While_type = make_type("While", stmt_type, While_fields, 4);
     if (!While_type) return 0;
+    Until_type = make_type("Until", stmt_type, Until_fields, 3);
+    if (!Until_type) return 0;
     If_type = make_type("If", stmt_type, If_fields, 3);
     if (!If_type) return 0;
     With_type = make_type("With", stmt_type, With_fields, 2);
@@ -1491,8 +1501,8 @@ AsyncFor(expr_ty target, expr_ty iter, asdl_seq * body, asdl_seq * orelse, int
 }
 
 stmt_ty
-While(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno, int
-      col_offset, PyArena *arena)
+While(asdl_seq * setup, expr_ty test, asdl_seq * body, asdl_seq * orelse, int
+      lineno, int col_offset, PyArena *arena)
 {
     stmt_ty p;
     if (!test) {
@@ -1504,9 +1514,32 @@ While(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno, int
     if (!p)
         return NULL;
     p->kind = While_kind;
+    p->v.While.setup = setup;
     p->v.While.test = test;
     p->v.While.body = body;
     p->v.While.orelse = orelse;
+    p->lineno = lineno;
+    p->col_offset = col_offset;
+    return p;
+}
+
+stmt_ty
+Until(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno, int
+      col_offset, PyArena *arena)
+{
+    stmt_ty p;
+    if (!test) {
+        PyErr_SetString(PyExc_ValueError,
+                        "field test is required for Until");
+        return NULL;
+    }
+    p = (stmt_ty)PyArena_Malloc(arena, sizeof(*p));
+    if (!p)
+        return NULL;
+    p->kind = Until_kind;
+    p->v.Until.test = test;
+    p->v.Until.body = body;
+    p->v.Until.orelse = orelse;
     p->lineno = lineno;
     p->col_offset = col_offset;
     return p;
@@ -2843,6 +2876,11 @@ ast2obj_stmt(void* _o)
     case While_kind:
         result = PyType_GenericNew(While_type, NULL, NULL);
         if (!result) goto failed;
+        value = ast2obj_list(o->v.While.setup, ast2obj_stmt);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_setup, value) == -1)
+            goto failed;
+        Py_DECREF(value);
         value = ast2obj_expr(o->v.While.test);
         if (!value) goto failed;
         if (_PyObject_SetAttrId(result, &PyId_test, value) == -1)
@@ -2854,6 +2892,25 @@ ast2obj_stmt(void* _o)
             goto failed;
         Py_DECREF(value);
         value = ast2obj_list(o->v.While.orelse, ast2obj_stmt);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_orelse, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        break;
+    case Until_kind:
+        result = PyType_GenericNew(Until_type, NULL, NULL);
+        if (!result) goto failed;
+        value = ast2obj_expr(o->v.Until.test);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_test, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        value = ast2obj_list(o->v.Until.body, ast2obj_stmt);
+        if (!value) goto failed;
+        if (_PyObject_SetAttrId(result, &PyId_body, value) == -1)
+            goto failed;
+        Py_DECREF(value);
+        value = ast2obj_list(o->v.Until.orelse, ast2obj_stmt);
         if (!value) goto failed;
         if (_PyObject_SetAttrId(result, &PyId_orelse, value) == -1)
             goto failed;
@@ -4966,10 +5023,41 @@ obj2ast_stmt(PyObject* obj, stmt_ty* out, PyArena* arena)
         return 1;
     }
     if (isinstance) {
+        asdl_seq* setup;
         expr_ty test;
         asdl_seq* body;
         asdl_seq* orelse;
 
+        if (_PyObject_LookupAttrId(obj, &PyId_setup, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"setup\" missing from While");
+            return 1;
+        }
+        else {
+            int res;
+            Py_ssize_t len;
+            Py_ssize_t i;
+            if (!PyList_Check(tmp)) {
+                PyErr_Format(PyExc_TypeError, "While field \"setup\" must be a list, not a %.200s", tmp->ob_type->tp_name);
+                goto failed;
+            }
+            len = PyList_GET_SIZE(tmp);
+            setup = _Py_asdl_seq_new(len, arena);
+            if (setup == NULL) goto failed;
+            for (i = 0; i < len; i++) {
+                stmt_ty val;
+                res = obj2ast_stmt(PyList_GET_ITEM(tmp, i), &val, arena);
+                if (res != 0) goto failed;
+                if (len != PyList_GET_SIZE(tmp)) {
+                    PyErr_SetString(PyExc_RuntimeError, "While field \"setup\" changed size during iteration");
+                    goto failed;
+                }
+                asdl_seq_SET(setup, i, val);
+            }
+            Py_CLEAR(tmp);
+        }
         if (_PyObject_LookupAttrId(obj, &PyId_test, &tmp) < 0) {
             return 1;
         }
@@ -5043,7 +5131,93 @@ obj2ast_stmt(PyObject* obj, stmt_ty* out, PyArena* arena)
             }
             Py_CLEAR(tmp);
         }
-        *out = While(test, body, orelse, lineno, col_offset, arena);
+        *out = While(setup, test, body, orelse, lineno, col_offset, arena);
+        if (*out == NULL) goto failed;
+        return 0;
+    }
+    isinstance = PyObject_IsInstance(obj, (PyObject*)Until_type);
+    if (isinstance == -1) {
+        return 1;
+    }
+    if (isinstance) {
+        expr_ty test;
+        asdl_seq* body;
+        asdl_seq* orelse;
+
+        if (_PyObject_LookupAttrId(obj, &PyId_test, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"test\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            res = obj2ast_expr(tmp, &test, arena);
+            if (res != 0) goto failed;
+            Py_CLEAR(tmp);
+        }
+        if (_PyObject_LookupAttrId(obj, &PyId_body, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"body\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            Py_ssize_t len;
+            Py_ssize_t i;
+            if (!PyList_Check(tmp)) {
+                PyErr_Format(PyExc_TypeError, "Until field \"body\" must be a list, not a %.200s", tmp->ob_type->tp_name);
+                goto failed;
+            }
+            len = PyList_GET_SIZE(tmp);
+            body = _Py_asdl_seq_new(len, arena);
+            if (body == NULL) goto failed;
+            for (i = 0; i < len; i++) {
+                stmt_ty val;
+                res = obj2ast_stmt(PyList_GET_ITEM(tmp, i), &val, arena);
+                if (res != 0) goto failed;
+                if (len != PyList_GET_SIZE(tmp)) {
+                    PyErr_SetString(PyExc_RuntimeError, "Until field \"body\" changed size during iteration");
+                    goto failed;
+                }
+                asdl_seq_SET(body, i, val);
+            }
+            Py_CLEAR(tmp);
+        }
+        if (_PyObject_LookupAttrId(obj, &PyId_orelse, &tmp) < 0) {
+            return 1;
+        }
+        if (tmp == NULL) {
+            PyErr_SetString(PyExc_TypeError, "required field \"orelse\" missing from Until");
+            return 1;
+        }
+        else {
+            int res;
+            Py_ssize_t len;
+            Py_ssize_t i;
+            if (!PyList_Check(tmp)) {
+                PyErr_Format(PyExc_TypeError, "Until field \"orelse\" must be a list, not a %.200s", tmp->ob_type->tp_name);
+                goto failed;
+            }
+            len = PyList_GET_SIZE(tmp);
+            orelse = _Py_asdl_seq_new(len, arena);
+            if (orelse == NULL) goto failed;
+            for (i = 0; i < len; i++) {
+                stmt_ty val;
+                res = obj2ast_stmt(PyList_GET_ITEM(tmp, i), &val, arena);
+                if (res != 0) goto failed;
+                if (len != PyList_GET_SIZE(tmp)) {
+                    PyErr_SetString(PyExc_RuntimeError, "Until field \"orelse\" changed size during iteration");
+                    goto failed;
+                }
+                asdl_seq_SET(orelse, i, val);
+            }
+            Py_CLEAR(tmp);
+        }
+        *out = Until(test, body, orelse, lineno, col_offset, arena);
         if (*out == NULL) goto failed;
         return 0;
     }
@@ -8190,6 +8364,8 @@ PyInit__ast(void)
     if (PyDict_SetItemString(d, "AsyncFor", (PyObject*)AsyncFor_type) < 0)
         return NULL;
     if (PyDict_SetItemString(d, "While", (PyObject*)While_type) < 0) return
+        NULL;
+    if (PyDict_SetItemString(d, "Until", (PyObject*)Until_type) < 0) return
         NULL;
     if (PyDict_SetItemString(d, "If", (PyObject*)If_type) < 0) return NULL;
     if (PyDict_SetItemString(d, "With", (PyObject*)With_type) < 0) return NULL;
