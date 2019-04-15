@@ -67,17 +67,10 @@ enum _stmt_kind {FunctionDef_kind=1, AsyncFunctionDef_kind=2, ClassDef_kind=3,
                   Return_kind=4, Delete_kind=5, Assign_kind=6,
                   AugAssign_kind=7, AnnAssign_kind=8, For_kind=9,
                   AsyncFor_kind=10, While_kind=11, Until_kind=12, If_kind=13,
-<<<<<<< HEAD
-                  With_kind=14, AsyncWith_kind=15, Raise_kind=16, Try_kind=17,
-                  Assert_kind=18, Import_kind=19, ImportFrom_kind=20,
-                  Global_kind=21, Nonlocal_kind=22, Expr_kind=23, Pass_kind=24,
-                  Break_kind=25, Continue_kind=26};
-=======
                   Unless_kind=14, With_kind=15, AsyncWith_kind=16,
                   Raise_kind=17, Try_kind=18, Assert_kind=19, Import_kind=20,
                   ImportFrom_kind=21, Global_kind=22, Nonlocal_kind=23,
                   Expr_kind=24, Pass_kind=25, Break_kind=26, Continue_kind=27};
->>>>>>> Unless
 struct _stmt {
     enum _stmt_kind kind;
     union {
