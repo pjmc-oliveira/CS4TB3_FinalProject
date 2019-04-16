@@ -68,9 +68,10 @@ extern "C" {
 /* These aren't used by the C tokenizer but are needed for tokenize.py */
 #define COMMENT         55
 #define NL              56
-#define ENCODING                57
-#define N_TOKENS        58
-
+#define ENCODING        57
+#define INCREMENT       58
+#define DECREMENT       59
+#define N_TOKENS        60
 /* Special definitions for cooperation with parser */
 
 #define NT_OFFSET               256
