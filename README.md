@@ -27,7 +27,11 @@ These language constructs are Increment, Decrement, Until, Unless, Do-While Loop
 - run `bash./configure` (This will create your Makefile)
 - run `make`( An executable will be created)
 - run `./python <LOCATION OF TEST i.e : /group-05-final-project/src/test/testSet.py>`
- VOLILA!
+ 
+VOLILA! Your output should look like below! : 
+
+![](Resources/TestOutput.png)
+
 
 -------------------------------------------------
 ### Summary of File's Modified 
