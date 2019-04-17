@@ -3016,6 +3016,49 @@ ast_for_expr_stmt(struct compiling *c, const node *n)
                              LINENO(n), n->n_col_offset, c->c_arena);
         }
     }
+
+     else if ((TYPE(CHILD(n, 1)) == incr_stmt) || (TYPE(CHILD(n, 1)) == decr_stmt)) {
+        expr_ty expr1, expr2;
+        node *ch = CHILD(n, 0);
+        operator_ty operator;
+        
+        switch (TYPE(CHILD(n, 1))){
+            case incr_stmt:
+                operator = Add; 
+                break;
+            case decr_stmt:
+                operator = Sub; 
+                break;
+        }
+
+        expr1 = ast_for_testlist(c, ch);
+        if (!expr1) {
+            return NULL;
+        }
+        switch (expr1->kind) {
+            case Name_kind:
+                if (forbidden_name(c, expr1->v.Name.id, n, 0)) {
+                    return NULL;
+                }
+                expr1->v.Name.ctx = Store;
+                break;
+            default:
+                ast_error(c, ch,
+                          "illegal target for increment/decrement");
+                return NULL;
+        }
+        // Create a PyObject for the number 1
+        PyObject *pynum = parsenumber(c, "1");
+
+        if (PyArena_AddPyObject(c->c_arena, pynum) < 0) {
+            Py_DECREF(pynum);
+            return NULL;
+        }
+        // Create that as an expression on the same line and offset as the ++/--
+        expr2 = Num(pynum, LINENO(n), n->n_col_offset, c->c_arena);
+        return AugAssign(expr1, operator, expr2, LINENO(n), n->n_col_offset, c->c_arena);
+     }
+
     else {
         int i;
         asdl_seq *targets;
@@ -3831,6 +3874,125 @@ ast_for_switch_stmt(struct compiling *c, const node *n)
 }
 
 static stmt_ty
+ast_for_unless_stmt(struct compiling *c, const node *n)
+{
+    /* unless_stmt: 'unless' test ':' suite  ['else' ':' suite]
+    */
+    char *s;
+
+    REQ(n, unless_stmt);
+
+    if (NCH(n) == 4) {
+        expr_ty expression;
+        asdl_seq *suite_seq;
+
+        expression = ast_for_expr(c, CHILD(n, 1));
+        if (!expression)
+            return NULL;
+        suite_seq = ast_for_suite(c, CHILD(n, 3));
+        if (!suite_seq)
+            return NULL;
+
+        return Unless(expression, suite_seq, NULL, LINENO(n), n->n_col_offset,
+                  c->c_arena);
+    }
+
+    s = STR(CHILD(n, 4));
+    /* s[2], the third character in the string, will be
+       's' for el_s_e, or
+       'i' for el_i_f
+    */
+    if (s[2] == 's') {
+        expr_ty expression;
+        asdl_seq *seq1, *seq2;
+
+        expression = ast_for_expr(c, CHILD(n, 1));
+        if (!expression)
+            return NULL;
+        seq1 = ast_for_suite(c, CHILD(n, 3));
+        if (!seq1)
+            return NULL;
+        seq2 = ast_for_suite(c, CHILD(n, 6));
+        if (!seq2)
+            return NULL;
+
+        return Unless(expression, seq1, seq2, LINENO(n), n->n_col_offset,
+                  c->c_arena);
+    }
+    else if (s[2] == 'i') {
+        int i, n_elif, has_else = 0;
+        expr_ty expression;
+        asdl_seq *suite_seq;
+        asdl_seq *orelse = NULL;
+        n_elif = NCH(n) - 4;
+        /* must reference the child n_elif+1 since 'else' token is third,
+           not fourth, child from the end. */
+        if (TYPE(CHILD(n, (n_elif + 1))) == NAME
+            && STR(CHILD(n, (n_elif + 1)))[2] == 's') {
+            has_else = 1;
+            n_elif -= 3;
+        }
+        n_elif /= 4;
+
+        if (has_else) {
+            asdl_seq *suite_seq2;
+
+            orelse = _Py_asdl_seq_new(1, c->c_arena);
+            if (!orelse)
+                return NULL;
+            expression = ast_for_expr(c, CHILD(n, NCH(n) - 6));
+            if (!expression)
+                return NULL;
+            suite_seq = ast_for_suite(c, CHILD(n, NCH(n) - 4));
+            if (!suite_seq)
+                return NULL;
+            suite_seq2 = ast_for_suite(c, CHILD(n, NCH(n) - 1));
+            if (!suite_seq2)
+                return NULL;
+
+            asdl_seq_SET(orelse, 0,
+                         Unless(expression, suite_seq, suite_seq2,
+                            LINENO(CHILD(n, NCH(n) - 6)),
+                            CHILD(n, NCH(n) - 6)->n_col_offset,
+                            c->c_arena));
+            /* the just-created orelse handled the last elif */
+            n_elif--;
+        }
+
+        for (i = 0; i < n_elif; i++) {
+            int off = 5 + (n_elif - i - 1) * 4;
+            asdl_seq *newobj = _Py_asdl_seq_new(1, c->c_arena);
+            if (!newobj)
+                return NULL;
+            expression = ast_for_expr(c, CHILD(n, off));
+            if (!expression)
+                return NULL;
+            suite_seq = ast_for_suite(c, CHILD(n, off + 2));
+            if (!suite_seq)
+                return NULL;
+
+            asdl_seq_SET(newobj, 0,
+                         Unless(expression, suite_seq, orelse,
+                            LINENO(CHILD(n, off)),
+                            CHILD(n, off)->n_col_offset, c->c_arena));
+            orelse = newobj;
+        }
+        expression = ast_for_expr(c, CHILD(n, 1));
+        if (!expression)
+            return NULL;
+        suite_seq = ast_for_suite(c, CHILD(n, 3));
+        if (!suite_seq)
+            return NULL;
+        return Unless(expression, suite_seq, orelse,
+                  LINENO(n), n->n_col_offset, c->c_arena);
+    }
+
+    PyErr_Format(PyExc_SystemError,
+                 "unexpected token in 'if' statement: %s", s);
+    return NULL;
+}
+
+static stmt_ty
 ast_for_while_stmt(struct compiling *c, const node *n)
 {
     /* while_stmt: 'while' test ':' suite ['else' ':' suite] */
@@ -4243,6 +4405,8 @@ ast_for_stmt(struct compiling *c, const node *n)
         switch (TYPE(ch)) {
             case if_stmt:
                 return ast_for_if_stmt(c, ch);
+            case unless_stmt:
+                return ast_for_unless_stmt(c, ch);
             case while_stmt:
                 return ast_for_while_stmt(c, ch);
             case until_stmt:

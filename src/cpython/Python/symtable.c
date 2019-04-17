@@ -1241,6 +1241,11 @@ symtable_visit_stmt(struct symtable *st, stmt_ty s)
         VISIT_SEQ(st, stmt, s->v.Switch.body);
         if (s->v.Switch.orelse)
             VISIT_SEQ(st, stmt, s->v.Switch.orelse);
+    case Unless_kind:
+        VISIT(st, expr, s->v.Unless.test);
+        VISIT_SEQ(st, stmt, s->v.Unless.body);
+        if (s->v.Unless.orelse)
+            VISIT_SEQ(st, stmt, s->v.Unless.orelse);
         break;
     case Raise_kind:
         if (s->v.Raise.exc) {

@@ -1447,6 +1447,10 @@ find_ann(asdl_seq *stmts)
             res = find_ann(st->v.If.body) ||
                   find_ann(st->v.If.orelse);
             break;
+        case Unless_kind:
+            res = find_ann(st->v.Unless.body) ||
+                  find_ann(st->v.Unless.orelse);
+            break;
         case With_kind:
             res = find_ann(st->v.With.body);
             break;
@@ -2336,6 +2340,46 @@ compiler_if(struct compiler *c, stmt_ty s)
 }
 
 static int
+compiler_unless(struct compiler *c, stmt_ty s)
+{
+    basicblock *end, *next;
+    int constant;
+    assert(s->kind == Unless_kind);
+    end = compiler_new_block(c);
+    if (end == NULL)
+        return 0;
+
+    constant = expr_constant(s->v.Unless.test);
+    /* constant = 0: "if 0"
+     * constant = 1: "if 1", "if 2", ...
+     * constant = -1: rest */
+    if (constant == 1 ) {
+        if (s->v.Unless.orelse)
+            VISIT_SEQ(c, stmt, s->v.Unless.orelse);
+    } else if (constant == 0) {
+        VISIT_SEQ(c, stmt, s->v.Unless.body);
+    } else {
+        if (asdl_seq_LEN(s->v.Unless.orelse)) {
+            next = compiler_new_block(c);
+            if (next == NULL)
+                return 0;
+        }
+        else
+            next = end;
+        if (!compiler_jump_if(c, s->v.Unless.test, next, 1))
+            return 0;
+        VISIT_SEQ(c, stmt, s->v.Unless.body);
+        if (asdl_seq_LEN(s->v.Unless.orelse)) {
+            ADDOP_JREL(c, JUMP_FORWARD, end);
+            compiler_use_next_block(c, next);
+            VISIT_SEQ(c, stmt, s->v.Unless.orelse);
+        }
+    }
+    compiler_use_next_block(c, end);
+    return 1;
+}
+
+static int
 compiler_for(struct compiler *c, stmt_ty s)
 {
     basicblock *start, *cleanup, *end;
@@ -3123,6 +3167,8 @@ compiler_visit_stmt(struct compiler *c, stmt_ty s)
         return compiler_until(c, s);
     case If_kind:
         return compiler_if(c, s);
+    case Unless_kind:
+        return compiler_unless(c, s);
     case Raise_kind:
         n = 0;
         if (s->v.Raise.exc) {
