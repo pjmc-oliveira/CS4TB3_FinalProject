@@ -5,10 +5,10 @@ Group 5 Final Project
 
 
 ## What is it? 
-This is the project for the course COMP SCI 4TB3 - Syntax Based Tools and Compilers. Group 5, comprised of Pedro, Piranaven \& Zak will work together to enhance Python.
-Python is one of the most beloved programming languages. It contains a plethora of syntax \& semantics that enables its users to achieve their goals.However, it does not 
+This is the final project for the course COMP SCI 4TB3 - Syntax Based Tools and Compilers. Group 5, comprised of Pedro, Piranaven & Zak will work together to enhance Python.
+Python is one of the most beloved programming languages. It contains a plethora of syntax & semantics that enables its users to achieve their goals. However, it does not 
 contain a handful of syntax that we believe would enrich the programming language and provide developers with more flexibility. These language constructs are Increment,
-Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit
+Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit!
 
 
 
