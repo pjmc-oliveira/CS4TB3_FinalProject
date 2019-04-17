@@ -3644,6 +3644,192 @@ ast_for_if_stmt(struct compiling *c, const node *n)
     return NULL;
 }
 
+static expr_ty
+ast_for_case_item(struct compiling *c, const node *n, const expr_ty *source)
+{
+    /* comp_op expr | expr [ (',' (expr|star_expr))* '=' expr] */
+    if (TYPE(CHILD(n, 0)) == comp_op) {
+        if (TYPE(CHILD(n, 1)) != expr) {
+            // some error?
+            ast_error(c, n, "expected expr");
+            return NULL;
+        }
+        // comp_op expr
+        asdl_seq *rhs;
+        rhs = _Py_asdl_seq_new(1, c->c_arena);
+        if (!rhs)
+            return NULL;
+
+        expr_ty expr1;
+        expr1 = ast_for_expr(c, CHILD(n, 1));
+        if (!expr1)
+            return NULL;
+
+        asdl_int_seq *ops;
+        ops = _Py_asdl_int_seq_new(1, c->c_arena);
+        if (!ops)
+            return NULL;
+        
+        cmpop_ty op;
+        op = ast_for_comp_op(c, CHILD(n, 0));
+        if (!op)
+            return NULL;
+        
+
+        asdl_seq_SET(ops, 0, op);
+        asdl_seq_SET(rhs, 0, expr1);
+
+        // compare to Switch source
+        return Compare(source, ops, rhs,
+                       LINENO(n), n->n_col_offset,
+                       c->c_arena);
+    } else {
+        if (NCH(n) == 1) {
+            // just `expr`, default to Eq
+            asdl_seq *rhs;
+            rhs = _Py_asdl_seq_new(1, c->c_arena);
+            if (!rhs)
+                return NULL;
+
+            expr_ty expr1;
+            expr1 = ast_for_expr(c, CHILD(n, 0));
+            if (!expr1)
+                return NULL;
+
+            asdl_int_seq *ops;
+            ops = _Py_asdl_int_seq_new(1, c->c_arena);
+            if (!ops)
+                return NULL;
+
+            asdl_seq_SET(ops, 0, Eq);
+            asdl_seq_SET(rhs, 0, expr1);
+
+            return Compare(source, ops, rhs,
+                           LINENO(n), n->n_col_offset,
+                           c->c_arena);
+        } else {
+            // expr and assignment
+            ast_error(c, n, "Not implemented");
+            return NULL;
+        }
+    }
+}
+
+static stmt_ty
+ast_for_switch_stmt(struct compiling *c, const node *n)
+{
+    /*
+    switch_stmt: 'switch' test ':' NEWLINE INDENT ('case' case_item ':' suite)+ ['else' ':' suite] DEDENT
+    case_item: comp_op expr | expr [ (',' (expr|star_expr))* '=' expr]
+    */
+
+    REQ(n, switch_stmt);
+
+    // check has at least one case
+    if(NCH(n) < 10 || strcmp(STR(CHILD(n, 5)), "case") != 0) {
+        ast_error(c, n, "malformed 'switch' statement");
+        return NULL;
+    }
+
+    // get source expression
+    expr_ty source, expression;
+    source = ast_for_expr(c, CHILD(n, 1));
+    if (!source) {
+        ast_error(c, n, "0");
+        return NULL;
+    }
+    
+    int i, n_cases, has_else = 0;
+    asdl_seq *body = NULL, *orelse = NULL;
+
+    n_cases = NCH(n) - 6;
+
+    // check if has else
+    if (TYPE(CHILD(n, NCH(n) - 4)) == NAME
+        && STR(CHILD(n, NCH(n) - 4))[2] == 's') {
+        has_else = 1;
+        n_cases -= 3;
+    }
+
+    n_cases /= 4;
+
+    // create else and last case
+    if (has_else) {
+        asdl_seq *seq2;
+
+        orelse = _Py_asdl_seq_new(1, c->c_arena);
+        if (!orelse) {
+            ast_error(c, n, "A");
+            return NULL;
+        }
+
+        expression = ast_for_case_item(c, CHILD(n, NCH(n) - 7), source);
+        if (!expression) {
+            ast_error(c, n, "B");
+            return NULL;
+        }
+        
+        body = ast_for_suite(c, CHILD(n, NCH(n) - 5));
+        if (!body) {
+            ast_error(c, n, "C");
+            return NULL;
+        }
+        
+        seq2 = ast_for_suite(c, CHILD(n, NCH(n) - 2));
+        if (!seq2) {
+            ast_error(c, n, "D");
+            return NULL;
+        }
+        
+        asdl_seq_SET(orelse, 0,
+            Switch(
+                expression, body, seq2,
+                LINENO(CHILD(n, NCH(n) - 7)),
+                CHILD(n, NCH(n) - 7)->n_col_offset,
+                c->c_arena));
+        
+        n_cases--;
+    }
+
+    for (i = 0; i < n_cases - 1; i++) {
+        int off = 6 + (n_cases - i - 1) * 4;
+        asdl_seq *newobj = _Py_asdl_seq_new(1, c->c_arena);
+        if (!newobj)
+            return NULL;
+        
+        expression = ast_for_case_item(c, CHILD(n, off), source);
+        if (!expression)
+            return NULL;
+        
+        body = ast_for_suite(c, CHILD(n, off + 2));
+        if (!body)
+            return NULL;
+        
+        asdl_seq_SET(newobj, 0,
+            Switch(
+                expression, body, orelse,
+                LINENO(CHILD(n, off)),
+                CHILD(n, off)->n_col_offset, c->c_arena));
+        
+        orelse = newobj;
+    }
+
+    expression = ast_for_case_item(c, CHILD(n, 6), source);
+    if (!expression) {
+        ast_error(c, n, "F");
+        return NULL;
+    }
+    
+    body = ast_for_suite(c, CHILD(n, 8));
+    if (!body) {
+        ast_error(c, n, "G");
+        return NULL;
+    }
+
+    return Switch(expression, body, orelse,
+                  LINENO(n), n->n_col_offset, c->c_arena);
+}
+
 static stmt_ty
 ast_for_while_stmt(struct compiling *c, const node *n)
 {
@@ -3721,7 +3907,7 @@ ast_for_until_stmt(struct compiling *c, const node *n)
     }
 
     PyErr_Format(PyExc_SystemError,
-                 "wrong number of tokens for 'while' statement: %d",
+                 "wrong number of tokens for 'until' statement: %d",
                  NCH(n));
     return NULL;
 }
@@ -4067,6 +4253,8 @@ ast_for_stmt(struct compiling *c, const node *n)
                 return ast_for_try_stmt(c, ch);
             case with_stmt:
                 return ast_for_with_stmt(c, ch, 0);
+            case switch_stmt:
+                return ast_for_switch_stmt(c, ch);
             case funcdef:
                 return ast_for_funcdef(c, ch, NULL);
             case classdef:

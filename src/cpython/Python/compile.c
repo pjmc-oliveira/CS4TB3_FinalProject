@@ -195,6 +195,7 @@ static int expr_constant(expr_ty);
 
 static int compiler_with(struct compiler *, stmt_ty, int);
 static int compiler_async_with(struct compiler *, stmt_ty, int);
+static int compiler_switch(struct compiler *c, stmt_ty s);
 static int compiler_async_for(struct compiler *, stmt_ty);
 static int compiler_call_helper(struct compiler *c, int n,
                                 asdl_seq *args,
@@ -3158,6 +3159,8 @@ compiler_visit_stmt(struct compiler *c, stmt_ty s)
         return compiler_continue(c);
     case With_kind:
         return compiler_with(c, s, 0);
+    case Switch_kind:
+        return compiler_switch(c, s);
     case AsyncFunctionDef_kind:
         return compiler_function(c, s, 1);
     case AsyncWith_kind:
@@ -4488,6 +4491,41 @@ compiler_with(struct compiler *c, stmt_ty s, int pos)
     /* Finally block ends. */
     ADDOP(c, END_FINALLY);
     compiler_pop_fblock(c, FINALLY_END, finally);
+    return 1;
+}
+
+static int
+compiler_switch(struct compiler *c, stmt_ty s)
+{
+    // compiler_error(c, "compiler error");
+    basicblock *end, *next;
+
+    assert(s->kind == Switch_kind);
+    end = compiler_new_block(c);
+    if (end == NULL)
+        return 0;
+
+    
+    // if there's a next branch, set as next
+    if (asdl_seq_LEN(s->v.Switch.orelse)) {
+        next = compiler_new_block(c);
+        if (next == NULL)
+            return 0;
+    }
+    else // end is next
+        next = end;
+    
+    if (!compiler_jump_if(c, s->v.Switch.test, next, 0))
+        return 0;
+    
+    VISIT_SEQ(c, stmt, s->v.Switch.body);
+    if (asdl_seq_LEN(s->v.Switch.orelse)) {
+        ADDOP_JREL(c, JUMP_FORWARD, end);
+        compiler_use_next_block(c, next);
+        VISIT_SEQ(c, stmt, s->v.Switch.orelse);
+    }
+
+    compiler_use_next_block(c, end);
     return 1;
 }
 

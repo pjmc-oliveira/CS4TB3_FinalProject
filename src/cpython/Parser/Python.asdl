@@ -39,6 +39,7 @@ module Python
           | If(expr test, stmt* body, stmt* orelse)
           | With(withitem* items, stmt* body)
           | AsyncWith(withitem* items, stmt* body)
+          | Switch(expr test, stmt* body, stmt* orelse)
 
           | Raise(expr? exc, expr? cause)
           | Try(stmt* body, excepthandler* handlers, stmt* orelse, stmt* finalbody)

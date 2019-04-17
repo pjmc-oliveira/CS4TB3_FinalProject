@@ -67,7 +67,7 @@ global_stmt: 'global' NAME (',' NAME)*
 nonlocal_stmt: 'nonlocal' NAME (',' NAME)*
 assert_stmt: 'assert' test [',' test]
 
-compound_stmt: if_stmt | while_stmt | until_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt
+compound_stmt: if_stmt | while_stmt | until_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt | switch_stmt
 async_stmt: 'async' (funcdef | with_stmt | for_stmt)
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
@@ -80,6 +80,8 @@ try_stmt: ('try' ':' suite
            'finally' ':' suite))
 with_stmt: 'with' with_item (',' with_item)*  ':' suite
 with_item: test ['as' expr]
+switch_stmt: 'switch' test ':' NEWLINE INDENT ('case' case_item ':' suite)+ ['else' ':' suite] DEDENT
+case_item: comp_op expr | expr # [ (',' (expr|star_expr))* '=' expr]
 # NB compile.c makes sure that the default except clause is last
 except_clause: 'except' [test ['as' NAME]]
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
