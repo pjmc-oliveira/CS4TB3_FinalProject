@@ -60,20 +60,12 @@ def fib(n: int) -> int:
 class NilType(type):
     def __eq__(self, other):
         'Return true if can\'t access 0th element'
-        try:
-            other[0]
-            return False
-        except IndexError:
-            return True
+        return len(other) == 0
 
 class ConsType(type):
     def __eq__(self, other):
         'Return true if can access 0th element'
-        try:
-            other[0]
-            return True
-        except IndexError:
-            return False
+        return len(other) != 0
 
 class Nil(metaclass=NilType): pass
 class Cons(metaclass=ConsType): pass
