@@ -19,3 +19,12 @@ like to do next
 the Python sources without modifications. Clearly state in the readme which
 files are taken without modifications, which are modified, which are new
 Looks like interesting work!
+
+
+*Actions taken from Project Artifacts Feedback:*
+- Poster was put through Grammarly
+- Strong attempt was made to make the sentence concise and increase sentence precision.
+- A conclusion section was added to explain our personal experience, challenges, future work.  
+- Addess bar removed from header 
+- Modifications to the readme was made to highlight the modifications we made to the cPython source.
+- Instructions on how to run was added to the readme as well as other important information 
