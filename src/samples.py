@@ -1,4 +1,6 @@
-
+'''
+Some example usages for new language features
+'''
 
 # def running_avg():
 #     'Ask user for input and keep running avg'
