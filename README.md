@@ -6,9 +6,9 @@
 
 ## What is it? 
 The project for the course COMP SCI 4TB3 - Syntax Based Tools and Compilers will be to apply the knowledge gained from the course. Group 5, comprised of Pedro, Piranaven \& Zak will work together to enhance Python.
-Python is one of the most beloved programming languages. It contains a plethora of syntax that enables its users to achieve their goals.  
+Python is one of the most beloved programming languages. It contains a plethora of syntax \& semantics that enables its users to achieve their goals.  
 However, it does not contain a handful of syntax that we believe would enrich the programming language and provide developers with more flexibility. 
-These language constructs are Increment, Decrement, Until, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit
+These language constructs are Increment, Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit
 
 
 
@@ -26,7 +26,7 @@ These language constructs are Increment, Decrement, Until, Unless, Do-While Loop
 - Navigate to the directory src/cpython
 - run `bash ./configure` (This will create your Makefile)
 - run `make`( An executable will be created)
-- run `./python <LOCATION OF TEST>` (i.e: "/group-05-final-project/src/test/testSet.py")
+- run `./python <LOCATION OF TEST>` (i.e: `/group-05-final-project/src/test/testSet.py`)
  
 VOILA! Your output should look like below! : 
 
@@ -51,6 +51,29 @@ Modifications to src/cPython:
 - Parser/tokenizer.c
 - Include/token.h
 - Lib/lib2to3/tests/data/py3_test_grammar.py
+
+Additional modifications in IncrDecrExpr branc
+- Lib/opcode.py
+- Include/opcode.h
+- Include/abstract.h
+- Include/object.h
+- Objects/abstract.c
+- Modules/_collectionsmodule.c
+- Modules/_ctypes/_ctypes.c
+- Modules/_datetimemodule.c
+- Modules/_decimal/_decimal.c
+- Modules/_testcapimodule.c
+- Objects/boolobject.c
+- Objects/complexobject.c
+- Objects/dictobject.c
+- Objects/floatobject.c
+- Objects/longobject.c
+- Objects/object.c
+- Objects/setobject.c
+- Objects/typeobject.c
+- Objects/weakrefobject.c
+- PC/winreg.c
+- Python/ast_opt.c
 
 Auto-Generated Files we had to verify:
 
