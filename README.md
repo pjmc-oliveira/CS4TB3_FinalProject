@@ -13,17 +13,17 @@ Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These 
 
 
 -------------------------------------------------
-### How to Run?
+## How to Run?
 -------------------------------------------------
 
-## Setup Requirements 
+### Setup Requirements 
 (Would recommend running on VM or AWS instance)
 - Ensure you have gcc installed
 - Ensure you are able to call the commands make, configure, git
 - Clone the repo
 
 
-## Run Instructions
+### Run Instructions
 - Navigate to the directory src/cpython
 - run `bash ./configure` (This will create your Makefile)
 - run `make`( An executable will be created)
