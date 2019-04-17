@@ -10,7 +10,7 @@ import warnings
 
 from fnmatch import fnmatch, fnmatchcase
 
-from . import case, suite, util
+from . import case_, suite, util
 
 __unittest = True
 
@@ -20,7 +20,7 @@ __unittest = True
 VALID_MODULE_NAME = re.compile(r'[_a-z]\w*\.py$', re.IGNORECASE)
 
 
-class _FailedTest(case.TestCase):
+class _FailedTest(case_.TestCase):
     _testMethodName = None
 
     def __init__(self, method_name, exception):
@@ -50,11 +50,11 @@ def _make_failed_test(methodname, exception, suiteClass, message):
     return suiteClass((test,)), message
 
 def _make_skipped_test(methodname, exception, suiteClass):
-    @case.skip(str(exception))
+    @case_.skip(str(exception))
     def testSkipped(self):
         pass
     attrs = {methodname: testSkipped}
-    TestClass = type("ModuleSkipped", (case.TestCase,), attrs)
+    TestClass = type("ModuleSkipped", (case_.TestCase,), attrs)
     return suiteClass((TestClass(methodname),))
 
 def _jython_aware_splitext(path):
@@ -120,7 +120,7 @@ class TestLoader(object):
         tests = []
         for name in dir(module):
             obj = getattr(module, name)
-            if isinstance(obj, type) and issubclass(obj, case.TestCase):
+            if isinstance(obj, type) and issubclass(obj, case_.TestCase):
                 tests.append(self.loadTestsFromTestCase(obj))
 
         load_tests = getattr(module, 'load_tests', None)
@@ -138,8 +138,8 @@ class TestLoader(object):
     def loadTestsFromName(self, name, module=None):
         """Return a suite of all test cases given a string specifier.
 
-        The name may resolve either to a module, a test case class, a
-        test method within a test case class, or a callable object which
+        The name may resolve either to a module, a test case_ class, a
+        test method within a test case_ class, or a callable object which
         returns a TestCase or TestSuite instance.
 
         The method optionally resolves the names relative to a given module.
@@ -189,11 +189,11 @@ class TestLoader(object):
 
         if isinstance(obj, types.ModuleType):
             return self.loadTestsFromModule(obj)
-        elif isinstance(obj, type) and issubclass(obj, case.TestCase):
+        elif isinstance(obj, type) and issubclass(obj, case_.TestCase):
             return self.loadTestsFromTestCase(obj)
         elif (isinstance(obj, types.FunctionType) and
               isinstance(parent, type) and
-              issubclass(parent, case.TestCase)):
+              issubclass(parent, case_.TestCase)):
             name = parts[-1]
             inst = parent(name)
             # static methods follow a different path
@@ -205,7 +205,7 @@ class TestLoader(object):
             test = obj()
             if isinstance(test, suite.TestSuite):
                 return test
-            elif isinstance(test, case.TestCase):
+            elif isinstance(test, case_.TestCase):
                 return self.suiteClass([test])
             else:
                 raise TypeError("calling %s returned %s, not a test" %
@@ -253,7 +253,7 @@ class TestLoader(object):
         pattern then the package will be checked for a 'load_tests' function. If
         this exists then it will be called with (loader, tests, pattern) unless
         the package has already had load_tests called from the same discovery
-        invocation, in which case the package module object is not scanned for
+        invocation, in which case_ the package module object is not scanned for
         tests - this ensures that when a package uses discover to further
         discover child tests that infinite recursion does not happen.
 
@@ -434,7 +434,7 @@ class TestLoader(object):
             name = self._get_name_from_path(full_path)
             try:
                 module = self._get_module_from_name(name)
-            except case.SkipTest as e:
+            except case_.SkipTest as e:
                 return _make_skipped_test(name, e, self.suiteClass), False
             except:
                 error_case, error_message = \
@@ -468,7 +468,7 @@ class TestLoader(object):
             name = self._get_name_from_path(full_path)
             try:
                 package = self._get_module_from_name(name)
-            except case.SkipTest as e:
+            except case_.SkipTest as e:
                 return _make_skipped_test(name, e, self.suiteClass), False
             except:
                 error_case, error_message = \

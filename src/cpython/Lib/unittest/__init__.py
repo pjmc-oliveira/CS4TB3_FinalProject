@@ -56,7 +56,7 @@ __all__.extend(['getTestCaseNames', 'makeSuite', 'findTestCases'])
 __unittest = True
 
 from .result import TestResult
-from .case import (TestCase, FunctionTestCase, SkipTest, skip, skipIf,
+from .case_ import (TestCase, FunctionTestCase, SkipTest, skip, skipIf,
                    skipUnless, expectedFailure)
 from .suite import BaseTestSuite, TestSuite
 from .loader import (TestLoader, defaultTestLoader, makeSuite, getTestCaseNames,
