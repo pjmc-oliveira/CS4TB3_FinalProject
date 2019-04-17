@@ -151,9 +151,31 @@ class SwitchTests(unittest.TestCase):
                 x = False
         self.assertEqual(x, True)
 
+# while_stmt
+class doWhileTests(unittest.TestCase):
+    
+    def testBreakAfterWhile(self):
+        x = 0
+        do:
+            x += 1
+        while x < 5:
+            x += 2
 
+        self.assertEqual(x, 7)
+
+    def testBreakOnWhile(self):
+        x = 0
+        do:
+            x += 3
+        while x < 3:
+            x += 2
+
+        self.assertEqual(x, 3)
+
+
+        
 def test_main():
-    run_unittest(UntilTests, UnlessTests, IncrementTests, DecrementTests, SwitchTests)
+    run_unittest(UntilTests, UnlessTests, IncrementTests, DecrementTests, SwitchTests, doWhileTests)
 
 if __name__ == '__main__':
     test_main()
