@@ -13,10 +13,10 @@ These language constructs are Increment, Decrement, Until, Unless, Do-While Loop
 
 
 -------------------------------------------------
-### How to Use?
+### How to Run?
 -------------------------------------------------
 
-##Setup Requirements 
+## Setup Requirements 
 (Would recommend running on VM or AWS instance)
 - Ensure you have gcc installed
 - Ensure you are able to call the commands make, configure, git
@@ -24,13 +24,13 @@ These language constructs are Increment, Decrement, Until, Unless, Do-While Loop
 
 
 - Navigate to the directory src/cpython
-- run `bash./configure` (This will create your Makefile)
+- run `bash ./configure` (This will create your Makefile)
 - run `make`( An executable will be created)
-- run `./python <LOCATION OF TEST i.e : /group-05-final-project/src/test/testSet.py>`
+- run `./python <LOCATION OF TEST>` (i.e: "/group-05-final-project/src/test/testSet.py")
  
-VOLILA! Your output should look like below! : 
+VOILA! Your output should look like below! : 
 
-![](Resources/TestOutput.png)
+![alt text](./Resources/TestOutput.PNG)
 
 
 -------------------------------------------------
@@ -40,7 +40,7 @@ VOLILA! Your output should look like below! :
 Additions:
 - src/test/testSet.py
 
-From src/cPython:
+Modifications to src/cPython:
 
 - Grammar/Grammar
 - Python/ast.c
@@ -56,8 +56,8 @@ Auto-Generated Files we had to verify:
 
 - Include/graminit.h
 - Include/Python-ast.h
- - Python/Python-ast.c
- - Python/graminit.c
+- Python/Python-ast.c
+- Python/graminit.c
 
 -------------------------------------------------
 ### Summary of Folder Structure and File Contents 
