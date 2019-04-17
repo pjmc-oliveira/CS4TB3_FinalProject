@@ -2,22 +2,17 @@
 Some example usages for new language features
 '''
 
-# def running_avg():
-#     'Ask user for input and keep running avg'
-#     count = 0
-#     summ = 0
-#     print('Enter numbers to avg, press \'q\' to exit.')
-#     do:
-#         c = input('Enter a number: ')
-#     while c != 'q':
-#         try:
-#             summ += int(c)
-#             count++
-#         except ValueError:
-#             print('Invalid input!')
-#             break
-#     else:
-#         print(f'The avg is {summ/count}')
+def fact(n):
+    'Calculate the nth factorial iteratively'
+    'Usage: fact(5) -> 120'
+    i = 1
+    do:
+        i *= n
+        n--
+    while n > 0:
+        pass
+    return i
+
 
 class DescriptiveInt(int):
     'An int that can describe itself'
