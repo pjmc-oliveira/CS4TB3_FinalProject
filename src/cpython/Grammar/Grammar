@@ -39,13 +39,15 @@ simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
              import_stmt | global_stmt | nonlocal_stmt | assert_stmt)
 expr_stmt: testlist_star_expr (annassign | augassign (yield_expr|testlist) |
-                     ('=' (yield_expr|testlist_star_expr))*)
+                     ('=' (yield_expr|testlist_star_expr))* | incr_stmt | decr_stmt)
 annassign: ':' test ['=' test]
 testlist_star_expr: (test|star_expr) (',' (test|star_expr))* [',']
 augassign: ('+=' | '-=' | '*=' | '@=' | '/=' | '%=' | '&=' | '|=' | '^=' |
             '<<=' | '>>=' | '**=' | '//=')
 # For normal and annotated assignments, additional restrictions enforced by the interpreter
 del_stmt: 'del' exprlist
+incr_stmt: '++'
+decr_stmt: '--'
 pass_stmt: 'pass'
 flow_stmt: break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
 break_stmt: 'break'
@@ -67,9 +69,11 @@ global_stmt: 'global' NAME (',' NAME)*
 nonlocal_stmt: 'nonlocal' NAME (',' NAME)*
 assert_stmt: 'assert' test [',' test]
 
-compound_stmt: if_stmt | while_stmt | until_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt
+
+compound_stmt: if_stmt | unless_stmt | while_stmt | until_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt | switch_stmt
 async_stmt: 'async' (funcdef | with_stmt | for_stmt)
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
+unless_stmt: 'unless' test ':' suite ['else' ':' suite]
 while_stmt: ['do' ':' suite] 'while' test ':' suite ['else' ':' suite]
 until_stmt: 'until' test ':' suite ['else' ':' suite]
 for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
@@ -80,6 +84,8 @@ try_stmt: ('try' ':' suite
            'finally' ':' suite))
 with_stmt: 'with' with_item (',' with_item)*  ':' suite
 with_item: test ['as' expr]
+switch_stmt: 'switch' test ':' NEWLINE INDENT ('case' case_item ':' suite)+ ['else' ':' suite] DEDENT
+case_item: comp_op expr | expr # [ (',' (expr|star_expr))* '=' expr]
 # NB compile.c makes sure that the default except clause is last
 except_clause: 'except' [test ['as' NAME]]
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT

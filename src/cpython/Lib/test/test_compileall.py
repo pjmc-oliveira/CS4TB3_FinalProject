@@ -334,13 +334,13 @@ class CommandLineTestsBase:
 
     # Ensure that the default behavior of compileall's CLI is to create
     # PEP 3147/PEP 488 pyc files.
-    for name, ext, switch in [
+    for name, ext, switch_ in [
         ('normal', 'pyc', []),
         ('optimize', 'opt-1.pyc', ['-O']),
         ('doubleoptimize', 'opt-2.pyc', ['-OO']),
     ]:
-        def f(self, ext=ext, switch=switch):
-            script_helper.assert_python_ok(*(switch +
+        def f(self, ext=ext, switch_=switch_):
+            script_helper.assert_python_ok(*(switch_ +
                 ['-m', 'compileall', '-q', self.pkgdir]))
             # Verify the __pycache__ directory contents.
             self.assertTrue(os.path.exists(self.pkgdir_cachedir))

@@ -2,7 +2,7 @@
 
 import sys
 
-from . import case
+from . import case_
 from . import util
 
 __unittest = True
@@ -46,7 +46,7 @@ class BaseTestSuite(object):
         if not callable(test):
             raise TypeError("{} is not callable".format(repr(test)))
         if isinstance(test, type) and issubclass(test,
-                                                 (case.TestCase, TestSuite)):
+                                                 (case_.TestCase, TestSuite)):
             raise TypeError("TestCases and TestSuites must be instantiated "
                             "before passing them to addTest()")
         self._tests.append(test)
@@ -92,7 +92,7 @@ class BaseTestSuite(object):
 class TestSuite(BaseTestSuite):
     """A test suite is a composite test consisting of a number of TestCases.
 
-    For use, create an instance of TestSuite, then add test case instances.
+    For use, create an instance of TestSuite, then add test case_ instances.
     When all tests have been added, the suite can be passed to a test
     runner, such as TextTestRunner. It will run the individual test cases
     in the order in which they were added, aggregating the results. When
@@ -210,7 +210,7 @@ class TestSuite(BaseTestSuite):
     def _addClassOrModuleLevelException(self, result, exception, errorName):
         error = _ErrorHolder(errorName)
         addSkip = getattr(result, 'addSkip', None)
-        if addSkip is not None and isinstance(exception, case.SkipTest):
+        if addSkip is not None and isinstance(exception, case_.SkipTest):
             addSkip(error, str(exception))
         else:
             result.addError(error, sys.exc_info())

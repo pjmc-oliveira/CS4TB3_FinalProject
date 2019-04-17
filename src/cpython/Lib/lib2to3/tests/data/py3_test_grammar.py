@@ -155,6 +155,20 @@ the \'lazy\' dog.\n\
         self.assert_(x is Ellipsis)
         self.assertRaises(SyntaxError, eval, ".. .")
 
+    #decr_stmt: '--'
+    def testDecrementTests(self):
+        x = 1
+        x--
+
+        self.assertEqual(x, 0)
+        
+    # incr_stmt: '++'
+    def testIncrementTests(self):
+        x = 1
+        x++
+
+        self.assertEqual(x, 2)
+
 class GrammarTests(unittest.TestCase):
 
     # single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE
@@ -531,7 +545,7 @@ class GrammarTests(unittest.TestCase):
             if __debug__:
                 self.fail("AssertionError not raised by assert 0")
 
-    ### compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | funcdef | classdef
+    ### compound_stmt: if_stmt | unless_stmt | while_stmt | until_stmt | for_stmt | try_stmt | funcdef | classdef
     # Tested below
 
     def testIf(self):
@@ -547,6 +561,13 @@ class GrammarTests(unittest.TestCase):
         elif 0: pass
         else: pass
 
+    #until_stmt: 'until' test ':' suite ['else' ':' suite]
+    def testUntil(self):
+        x = 0 
+        until x == 2:
+            x += 1 
+        self.assertEqual(x, 2)
+        
     def testWhile(self):
         # 'while' test ':' suite ['else' ':' suite]
         while 0: pass
@@ -561,6 +582,16 @@ class GrammarTests(unittest.TestCase):
         else:
             x = 2
         self.assertEquals(x, 2)
+
+    #unless_stmt: 'unless' test ':' suite ['else' ':' suite]
+    def testUnless(self):
+        x = 2
+        unless x == 2:
+            x -= 1
+        else:
+            x += 1
+        
+        self.assertEqual(x, 3)
 
     def testFor(self):
         # 'for' exprlist 'in' exprlist ':' suite ['else' ':' suite]
@@ -682,7 +713,8 @@ class GrammarTests(unittest.TestCase):
         x = -1
         x = ~1
         x = ~1 ^ 1 & 1 | 1 & 1 ^ -1
-        x = -1*1/1 + 1*1 - ---1*1
+        #This test case is no longer valid due to the new increment/decrement tokens
+        #x = -1*1/1 + 1*1 - ---1*1
 
     def testSelectors(self):
         ### trailer: '(' [testlist] ')' | '[' subscript ']' | '.' NAME
@@ -940,8 +972,8 @@ class GrammarTests(unittest.TestCase):
         self.assertEqual((6 < 4 if 0 else 2), 2)
 
 
-def test_main():
-    run_unittest(TokenTests, GrammarTests)
+        def test_main():
+            run_unittest(TokenTests, GrammarTests)
 
-if __name__ == '__main__':
-    test_main()
+        if __name__ == '__main__':
+            test_main()
