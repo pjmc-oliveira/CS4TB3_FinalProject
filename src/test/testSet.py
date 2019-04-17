@@ -111,9 +111,49 @@ class DecrementTests(unittest.TestCase):
 
         self.assertEqual(x, -1.0)
 
+# switch_stmt
+class SwitchTests(unittest.TestCase):
+    def testEqualSwitchCaseTests(self):
+        x = 0
+        switch 5:
+            case 5:
+                x = 5
+        self.assertEqual(x, 5)
+    
+    def testElseSwitchCaseTests(self):
+        x = 0
+        switch 6:
+            case 5:
+                x = 5
+            else:
+                x = 1
+        self.assertEqual(x, 1)
+    
+    def testCmpSwitchCaseTests(self):
+        x = -1
+        switch 5:
+            case < 0:
+                x = 0
+            case < 5:
+                x = 1
+            case < 10:
+                x = 2
+            else:
+                x = 3
+        self.assertEqual(x, 2)
+    
+    def testInSwitchCaseTests(self):
+        x = 50
+        switch 5:
+            case in range(100):
+                x = True
+            else:
+                x = False
+        self.assertEqual(x, True)
+
 
 def test_main():
-    run_unittest(UntilTests, UnlessTests, IncrementTests, DecrementTests)
+    run_unittest(UntilTests, UnlessTests, IncrementTests, DecrementTests, SwitchTests)
 
 if __name__ == '__main__':
     test_main()
