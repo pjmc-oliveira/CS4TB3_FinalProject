@@ -1,14 +1,14 @@
-﻿Group 5 Final Project
+Group 5 Final Project
 =========================================
 **Team Name:**  Group 5<br/>
 **Team Members:** Pedro Oliveira, Zak Ahmed, Piranaven Selva
 
 
 ## What is it? 
-The project for the course COMP SCI 4TB3 - Syntax Based Tools and Compilers will be to apply the knowledge gained from the course. Group 5, comprised of Pedro, Piranaven \& Zak will work together to enhance Python.
-Python is one of the most beloved programming languages. It contains a plethora of syntax \& semantics that enables its users to achieve their goals.  
-However, it does not contain a handful of syntax that we believe would enrich the programming language and provide developers with more flexibility. 
-These language constructs are Increment, Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit
+This is the project for the course COMP SCI 4TB3 - Syntax Based Tools and Compilers. Group 5, comprised of Pedro, Piranaven \& Zak will work together to enhance Python.
+Python is one of the most beloved programming languages. It contains a plethora of syntax \& semantics that enables its users to achieve their goals.However, it does not 
+contain a handful of syntax that we believe would enrich the programming language and provide developers with more flexibility. These language constructs are Increment,
+Decrement, Until Loops, Unless, Do-While Loops, & Switch-Case Statements. These enhancements, although not necessarily pythonic, would undoubtedly strengthen a developers toolkit
 
 
 
@@ -23,6 +23,7 @@ These language constructs are Increment, Decrement, Until Loops, Unless, Do-Whil
 - Clone the repo
 
 
+## Run Instructions
 - Navigate to the directory src/cpython
 - run `bash ./configure` (This will create your Makefile)
 - run `make`( An executable will be created)
