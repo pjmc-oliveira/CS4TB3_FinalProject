@@ -1436,7 +1436,8 @@ find_ann(asdl_seq *stmts)
                   find_ann(st->v.AsyncFor.orelse);
             break;
         case While_kind:
-            res = find_ann(st->v.While.body) ||
+            res = find_ann(st->v.While.setup) ||
+                  find_ann(st->v.While.body) ||
                   find_ann(st->v.While.orelse);
             break;
         case Until_kind:
@@ -2493,6 +2494,10 @@ compiler_while(struct compiler *c, stmt_ty s)
 {
     basicblock *loop, *orelse, *end, *anchor = NULL;
     int constant = expr_constant(s->v.While.test);
+    
+    if (s->v.While.setup)
+        VISIT_SEQ(c, stmt, s->v.While.setup);
+
 
     if (constant == 0) {
         if (s->v.While.orelse)
@@ -2524,7 +2529,14 @@ compiler_while(struct compiler *c, stmt_ty s)
         if (!compiler_jump_if(c, s->v.While.test, anchor, 0))
             return 0;
     }
+
+
+
     VISIT_SEQ(c, stmt, s->v.While.body);
+
+    if (s->v.While.setup)
+        VISIT_SEQ(c, stmt, s->v.While.setup);
+
     ADDOP_JABS(c, JUMP_ABSOLUTE, loop);
 
     /* XXX should the two POP instructions be in a separate block
@@ -2541,63 +2553,6 @@ compiler_while(struct compiler *c, stmt_ty s)
 
     return 1;
 }
-
-// static int
-// compiler_until(struct compiler *c, stmt_ty s)
-// {
-//     basicblock *loop, *orelse, *end, *anchor = NULL;
-//     int constant = expr_constant(s->v.Until.test);
-
-//     if (constant == 1) {
-//         if (s->v.Until.orelse)
-//             VISIT_SEQ(c, stmt, s->v.Until.orelse);
-//         return 1;
-//     }
-//     loop = compiler_new_block(c);
-//     end = compiler_new_block(c);
-//     if (constant == -1) {
-//         anchor = compiler_new_block(c);
-//         if (anchor == NULL)
-//             return 0;
-//     }
-//     if (loop == NULL || end == NULL)
-//         return 0;
-//     if (s->v.Until.orelse) {
-//         orelse = compiler_new_block(c);
-//         if (orelse == NULL)
-//             return 0;
-//     }
-//     else
-//         orelse = NULL;
-
-//     ADDOP_JREL(c, SETUP_LOOP, end);
-//     compiler_use_next_block(c, loop);
-//     if (!compiler_push_fblock(c, LOOP, loop))
-//         return 0;
-//     if (constant == -1) {
-//         VISIT(c, expr, s->v.Until.test);
-//         ADDOP_JABS(c, POP_JUMP_IF_TRUE, anchor);
-//         if (!compiler_jump_if(c, s->v.Until.test, anchor, 0))
-//             return 0;
-//     }
-//     VISIT_SEQ(c, stmt, s->v.Until.body);
-//     ADDOP_JABS(c, JUMP_ABSOLUTE, loop);
-
-//     /* XXX should the two POP instructions be in a separate block
-//        if there is no else clause ?
-//     */
-
-//     if (constant == -1){
-//         compiler_use_next_block(c, anchor);
-//         ADDOP(c, POP_BLOCK);
-//     }
-//     compiler_pop_fblock(c, LOOP, loop);
-//     if (orelse != NULL) /* what if orelse is just pass? */
-//         VISIT_SEQ(c, stmt, s->v.Until.orelse);
-//     compiler_use_next_block(c, end);
-
-//     return 1;
-// }
 
 static int
 compiler_until(struct compiler *c, stmt_ty s)

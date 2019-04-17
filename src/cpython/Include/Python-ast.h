@@ -140,6 +140,7 @@ struct _stmt {
         } AsyncFor;
 
         struct {
+            asdl_seq *setup;
             expr_ty test;
             asdl_seq *body;
             asdl_seq *orelse;
@@ -498,9 +499,9 @@ stmt_ty _Py_For(expr_ty target, expr_ty iter, asdl_seq * body, asdl_seq *
 #define AsyncFor(a0, a1, a2, a3, a4, a5, a6) _Py_AsyncFor(a0, a1, a2, a3, a4, a5, a6)
 stmt_ty _Py_AsyncFor(expr_ty target, expr_ty iter, asdl_seq * body, asdl_seq *
                      orelse, int lineno, int col_offset, PyArena *arena);
-#define While(a0, a1, a2, a3, a4, a5) _Py_While(a0, a1, a2, a3, a4, a5)
-stmt_ty _Py_While(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno,
-                  int col_offset, PyArena *arena);
+#define While(a0, a1, a2, a3, a4, a5, a6) _Py_While(a0, a1, a2, a3, a4, a5, a6)
+stmt_ty _Py_While(asdl_seq * setup, expr_ty test, asdl_seq * body, asdl_seq *
+                  orelse, int lineno, int col_offset, PyArena *arena);
 #define Until(a0, a1, a2, a3, a4, a5) _Py_Until(a0, a1, a2, a3, a4, a5)
 stmt_ty _Py_Until(expr_ty test, asdl_seq * body, asdl_seq * orelse, int lineno,
                   int col_offset, PyArena *arena);

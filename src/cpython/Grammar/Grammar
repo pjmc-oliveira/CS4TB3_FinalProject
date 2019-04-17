@@ -74,7 +74,7 @@ compound_stmt: if_stmt | unless_stmt | while_stmt | until_stmt | for_stmt | try_
 async_stmt: 'async' (funcdef | with_stmt | for_stmt)
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 unless_stmt: 'unless' test ':' suite ['else' ':' suite]
-while_stmt: 'while' test ':' suite ['else' ':' suite]
+while_stmt: ['do' ':' suite] 'while' test ':' suite ['else' ':' suite]
 until_stmt: 'until' test ':' suite ['else' ':' suite]
 for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 try_stmt: ('try' ':' suite

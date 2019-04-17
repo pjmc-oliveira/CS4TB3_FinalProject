@@ -420,7 +420,8 @@ validate_stmt(stmt_ty stmt)
             validate_body(stmt->v.AsyncFor.body, "AsyncFor") &&
             validate_stmts(stmt->v.AsyncFor.orelse);
     case While_kind:
-        return validate_expr(stmt->v.While.test, Load) &&
+        return validate_stmts(stmt->v.While.setup) &&
+            validate_expr(stmt->v.While.test, Load) &&
             validate_body(stmt->v.While.body, "While") &&
             validate_stmts(stmt->v.While.orelse);
     case Until_kind:
@@ -3995,36 +3996,74 @@ ast_for_unless_stmt(struct compiling *c, const node *n)
 static stmt_ty
 ast_for_while_stmt(struct compiling *c, const node *n)
 {
-    /* while_stmt: 'while' test ':' suite ['else' ':' suite] */
+    /* while_stmt: ['do' ':' suite] 'while' test ':' suite ['else' ':' suite] */
     REQ(n, while_stmt);
 
     if (NCH(n) == 4) {
         expr_ty expression;
         asdl_seq *suite_seq;
-
+  
         expression = ast_for_expr(c, CHILD(n, 1));
         if (!expression)
             return NULL;
         suite_seq = ast_for_suite(c, CHILD(n, 3));
         if (!suite_seq)
             return NULL;
-        return While(expression, suite_seq, NULL, LINENO(n), n->n_col_offset, c->c_arena);
+        return While(NULL, expression, suite_seq, NULL, LINENO(n), n->n_col_offset, c->c_arena);
     }
     else if (NCH(n) == 7) {
-        expr_ty expression;
-        asdl_seq *seq1, *seq2;
+       if (strcmp(STR(CHILD(n, 0)), "do") == 0){
+            expr_ty expression;
+            asdl_seq *setup_seq, *seq1; 
+            
+            setup_seq = ast_for_suite(c, CHILD(n, 2));
+            if(!setup_seq)
+                return  NULL;
+            expression = ast_for_expr(c, CHILD(n, 4));
+            if (!expression)
+                return NULL;
+            seq1 = ast_for_suite(c, CHILD(n, 6));
+            if (!seq1)
+                return NULL;
 
-        expression = ast_for_expr(c, CHILD(n, 1));
+
+            return While(setup_seq, expression, seq1, NULL, LINENO(n), n->n_col_offset, c->c_arena);
+       }
+        else if (strcmp(STR(CHILD(n, 0)), "while") == 0){
+            expr_ty expression;
+            asdl_seq *seq1, *seq2;
+
+            expression = ast_for_expr(c, CHILD(n, 1));
+            if (!expression)
+                return NULL;
+            seq1 = ast_for_suite(c, CHILD(n, 3));
+            if (!seq1)
+                return NULL;
+            seq2 = ast_for_suite(c, CHILD(n, 6));
+            if (!seq2)
+                return NULL;
+
+            return While(NULL, expression, seq1, seq2, LINENO(n), n->n_col_offset, c->c_arena);
+        }
+    }
+    else if  (NCH(n) == 10) {
+        expr_ty expression;
+        asdl_seq *setup_seq, *seq1, *seq2; 
+        
+        setup_seq = ast_for_suite(c, CHILD(n, 2));
+        if(!setup_seq)
+            return  NULL;
+        expression = ast_for_expr(c, CHILD(n, 4));
         if (!expression)
             return NULL;
-        seq1 = ast_for_suite(c, CHILD(n, 3));
+        seq1 = ast_for_suite(c, CHILD(n, 6));
         if (!seq1)
             return NULL;
-        seq2 = ast_for_suite(c, CHILD(n, 6));
+        seq2 = ast_for_suite(c, CHILD(n, 9));
         if (!seq2)
             return NULL;
 
-        return While(expression, seq1, seq2, LINENO(n), n->n_col_offset, c->c_arena);
+        return While(setup_seq, expression, seq1, seq2, LINENO(n), n->n_col_offset, c->c_arena);
     }
 
     PyErr_Format(PyExc_SystemError,
